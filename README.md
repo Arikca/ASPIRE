@@ -43,6 +43,21 @@ It also returns `correctedTestCases`: runnable replacements for all four shallow
 
 `POST /api/eval/repeat` runs the identical payload five times and saves `artifacts/llm-runs/repeat-5.json`. The real assignment fixture produced suite scores **49.5, 48.5, 49.5, 49.0, and 50.5** (mean **49.4**, population standard deviation **0.66**, range **2.0**) with `gpt-4.1-mini` at temperature zero. The configured initial CI block threshold is **55/100**: it is 4.5 points above the worst observed poor-suite score and well beyond the measured noise. A candidate must not be allowed to calculate its own gate; recalibrate the configured threshold from labelled known-good and known-bad suites, choosing a value above the bad suites' noisy upper bound and below the good suites' noisy lower bound.
 
+## Submission evidence: prompts, raw outputs, and model settings
+
+This repository includes the exact evidence from the final five-run evaluation, not synthetic example responses:
+
+- `artifacts/llm-runs/repeat-5.json` is the five-run aggregate response, including each run ID, all per-case scores, and the variance calculation.
+- Each of these five run folders contains the exact system/user prompt sent for every valid test case in `prompts/`, the unmodified model response in `raw/`, and the schema-validated parsed JSON in `parsed/`:
+  - `884c2564-2c24-46be-9656-9925cfca1f75`
+  - `e1711cf1-4bd3-4bc5-a825-c6e388147d48`
+  - `a9ddc9f6-aed1-4e6a-867a-9d65566e5667`
+  - `00bb6442-e4a4-43c3-88f8-a6f089d31163`
+  - `323134fd-cbde-4d92-b0e9-79cddc61304c`
+- `tc-4` has no prompt or raw output because its malformed JSON is deterministically rejected before an LLM is called; the validation failure is recorded in each `result.json`.
+
+The model is `gpt-4.1-mini` (override with `OPENAI_MODEL`) at temperature `0`; see `src/main/resources/application.yml`. Calls use Spring AI's provider-native structured-output mode with schema validation, and raw output is then validated independently against `src/main/resources/schema/llm-test-case-score.json`. The full scoring instruction is the `SYSTEM` prompt in `TestCaseQualityEvaluator.java`.
+
 Use temperature 0, provider-native structured output, a fixed rubric, deterministic caps, and a pinned model version to reduce variance. Calibration should compare five-run distributions for accepted and rejected suites, then choose the highest threshold whose false-reject rate is acceptable.
 
 ## Known blind spot
