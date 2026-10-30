@@ -1,0 +1,15 @@
+{
+  "mappedRequirements" : [ "credit_before_debit" ],
+  "coverageScore" : 20,
+  "relevanceScore" : 50,
+  "bugCatchingScore" : 20,
+  "explanation" : "This test only initiates a top-up and checks that the wallet balance increases. It partially covers the credit_before_debit requirement by verifying the wallet is credited, but does not verify that the funding source is debited only after crediting. It does not cover fx_lock or dual_approval requirements at all. It lacks assertions about FX rate locking, ordering of credit and debit, or approval for large top-ups.",
+  "missingAssertions" : [ "Verify FX rate is locked at the moment top-up is initiated", "Verify funding source is debited only after destination wallet is credited", "Verify top-ups above SGD 10,000 require second-owner approval before settlement" ],
+  "hypothesizedBugThisWouldMiss" : "A bug where the FX rate is not locked at initiation and fluctuates during processing would not be caught. Also, a bug where the funding source is debited before the wallet is credited would not be detected. Additionally, a bug where top-ups above SGD 10,000 do not require second-owner approval would be missed.",
+  "suggestedReplacement" : {
+    "id" : "tc-1-revised",
+    "description" : "Verify wallet top-up with FX rate lock, credit-before-debit, and dual approval for large amounts",
+    "steps" : [ "Initiate top-up of SGD 500 with FX rate recorded at initiation", "Verify FX rate is locked and does not change during processing", "Verify destination wallet balance increases by SGD 500", "Verify funding source is debited only after wallet credit is confirmed", "Initiate top-up of SGD 15,000", "Verify system requests second business owner approval before settlement", "Simulate payment provider callback timeout after 5 seconds", "Verify transaction is rolled back and neither wallet nor funding source is affected" ],
+    "expectedResult" : "FX rate is locked at initiation; destination wallet is credited before funding source is debited; top-ups above SGD 10,000 require second-owner approval before settlement; transaction rolls back if payment provider callback times out after 5 seconds"
+  }
+}

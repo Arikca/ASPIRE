@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mappedRequirements", "coverageScore", "relevanceScore", "bugCatchingScore", "explanation", "missingAssertions", "hypothesizedBugThisWouldMiss", "suggestedReplacement"],
+  "properties": {
+    "mappedRequirements": {"type": "array", "items": {"type": "string"}},
+    "coverageScore": {"type": "integer", "minimum": 0, "maximum": 100},
+    "relevanceScore": {"type": "integer", "minimum": 0, "maximum": 100},
+    "bugCatchingScore": {"type": "integer", "minimum": 0, "maximum": 100},
+    "explanation": {"type": "string", "minLength": 1},
+    "missingAssertions": {"type": "array", "items": {"type": "string"}},
+    "hypothesizedBugThisWouldMiss": {"type": "string"},
+    "suggestedReplacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description", "steps", "expectedResult"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1},
+        "steps": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "expectedResult": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

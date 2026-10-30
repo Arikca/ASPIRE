@@ -1,0 +1,15 @@
+{
+  "mappedRequirements" : [ "fx_lock" ],
+  "coverageScore" : 20,
+  "relevanceScore" : 80,
+  "bugCatchingScore" : 20,
+  "explanation" : "This test only partially covers the 'fx_lock' requirement by verifying the FX rate at initiation, but it does not verify that the rate remains locked throughout the transaction or that it is used in the settlement. It does not cover 'credit_before_debit' or 'dual_approval' requirements at all. The test lacks steps to verify the transactional order of credit and debit, or the approval process for large top-ups.",
+  "missingAssertions" : [ "Verify that the destination wallet is credited before the funding source is debited", "Verify that top-ups above SGD 10,000 require second-owner approval before settlement" ],
+  "hypothesizedBugThisWouldMiss" : "A bug where the funding source is debited before the destination wallet is credited would not be caught. Also, a bug where top-ups above SGD 10,000 proceed without second-owner approval would be missed.",
+  "suggestedReplacement" : {
+    "id" : "tc-2-enhanced",
+    "description" : "Verify full top-up transaction flow including FX rate lock, credit before debit, and dual approval for large amounts",
+    "steps" : [ "Initiate top-up of USD 100 and record FX rate at initiation", "Verify FX rate used in settlement matches the locked rate", "Verify destination wallet is credited before funding source is debited", "Initiate top-up of SGD 15,000", "Verify that second business owner approval is requested before settlement", "Approve top-up with second owner", "Verify settlement completes successfully" ],
+    "expectedResult" : "FX rate is locked at initiation and used for settlement; destination wallet is credited before funding source is debited; top-ups above SGD 10,000 require second-owner approval before settlement"
+  }
+}

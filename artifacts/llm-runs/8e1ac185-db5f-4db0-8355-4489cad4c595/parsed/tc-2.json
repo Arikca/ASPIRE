@@ -1,0 +1,15 @@
+{
+  "mappedRequirements" : [ "fx_lock", "credit_before_debit", "dual_approval" ],
+  "coverageScore" : 30,
+  "relevanceScore" : 50,
+  "bugCatchingScore" : 30,
+  "explanation" : "This test only verifies that the FX rate shown matches the rate at initiation, partially covering the 'fx_lock' requirement. It does not test the transactional order of crediting the wallet before debiting the funding source ('credit_before_debit'), nor does it test the dual approval requirement for top-ups above SGD 10,000 ('dual_approval'). The test also lacks verification of the actual debit and credit operations and does not simulate or check rollback behavior on callback timeout. It misses asserting that the funding source is debited only after the wallet is credited, and that top-ups above the threshold require second-owner approval before settlement.",
+  "missingAssertions" : [ "Assert that the destination wallet balance increases before the funding source is debited", "Assert that for top-ups above SGD 10,000, a second business owner's approval is required before settlement", "Assert that if the payment provider callback times out, the transaction is rolled back with no changes to wallet or funding source" ],
+  "hypothesizedBugThisWouldMiss" : "A bug where the funding source is debited before the destination wallet is credited would not be caught, as the test does not verify the order of operations or transactional integrity. Also, a bug where top-ups above SGD 10,000 proceed without second-owner approval would be missed.",
+  "suggestedReplacement" : {
+    "id" : "tc-2-revised",
+    "description" : "Verify transactional integrity of multi-currency wallet top-up including FX rate lock, credit-before-debit, and dual approval for large amounts",
+    "steps" : [ "Initiate top-up of USD 100 and record FX rate at initiation", "Verify destination wallet balance increases by correct amount using locked FX rate", "Verify funding source is debited only after wallet credit is confirmed", "Initiate top-up of SGD 15,000", "Attempt to settle without second-owner approval and verify settlement is blocked", "Obtain second-owner approval and verify settlement completes", "Simulate payment provider callback timeout during a top-up and verify transaction rollback with no changes to wallet or funding source" ],
+    "expectedResult" : "FX rate is locked at initiation; destination wallet is credited before funding source is debited; top-ups above SGD 10,000 require second-owner approval before settlement; transaction rolls back on payment provider callback timeout"
+  }
+}

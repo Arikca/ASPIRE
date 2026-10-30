@@ -1,0 +1,15 @@
+{
+  "mappedRequirements" : [ "timeout_rollback" ],
+  "coverageScore" : 40,
+  "relevanceScore" : 90,
+  "bugCatchingScore" : 70,
+  "explanation" : "This test case explicitly attempts to verify the timeout rollback behavior (timeout_rollback) by simulating a provider timeout and checking that the wallet balance remains unchanged and the funding source is not debited. However, it does not verify that the FX rate is locked at the moment of top-up initiation (fx_lock), nor does it check that the destination wallet is credited before the funding source is debited (credit_before_debit). It also does not cover the dual approval requirement for top-ups above SGD 10,000 (dual_approval). The test's oracle is relevant and bug-catching for timeout rollback but misses verifying transactional ordering and approval logic. A concrete missed assertion is verifying that the FX rate remains constant from initiation to settlement, which could miss bugs where the rate changes after initiation. A concrete bug this test would miss is if the funding source is debited before the wallet is credited, violating the credit_before_debit requirement, since it only checks final balances after rollback, not the order of operations.",
+  "missingAssertions" : [ "Verify FX rate is locked at top-up initiation", "Verify destination wallet is credited before funding source is debited", "Verify dual approval is required for top-ups above SGD 10,000" ],
+  "hypothesizedBugThisWouldMiss" : "A bug where the funding source is debited before the destination wallet is credited, violating the credit_before_debit requirement, would not be detected because the test only checks final balances after rollback, not the transactional order.",
+  "suggestedReplacement" : {
+    "id" : "tc-3-revised",
+    "description" : "Verify transactional integrity and approval logic during top-up with timeout and large amount",
+    "steps" : [ "Initiate a top-up of SGD 15,000 and record FX rate at initiation", "Verify destination wallet is credited before funding source is debited", "Simulate provider callback timeout after 5 seconds", "Verify transaction is rolled back: wallet balance and funding source unchanged", "Initiate a top-up above SGD 10,000 and verify that second business owner approval is required before settlement" ],
+    "expectedResult" : "FX rate is locked at initiation; destination wallet credited before funding source debited; transaction rolled back on provider timeout with no balance changes; top-ups above SGD 10,000 require second-owner approval before settlement"
+  }
+}

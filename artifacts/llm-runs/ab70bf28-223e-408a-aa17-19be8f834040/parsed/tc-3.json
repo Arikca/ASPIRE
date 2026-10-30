@@ -1,0 +1,15 @@
+{
+  "mappedRequirements" : [ "fx_lock", "credit_before_debit", "dual_approval" ],
+  "coverageScore" : 30,
+  "relevanceScore" : 70,
+  "bugCatchingScore" : 40,
+  "explanation" : "The test only covers the rollback behavior on timeout, which relates indirectly to credit_before_debit by ensuring no partial updates occur. However, it does not explicitly verify that the FX rate was locked at initiation (fx_lock), nor does it test the dual approval requirement for top-ups above SGD 10,000 (dual_approval). The test also lacks explicit checks that the destination wallet was not credited and the funding source was not debited, only checking wallet balance generally. It misses asserting the FX rate lock and the dual approval process entirely.",
+  "missingAssertions" : [ "Verify FX rate is locked at top-up initiation", "Verify destination wallet is credited before funding source is debited", "Verify second-owner approval is required for top-ups above SGD 10,000" ],
+  "hypothesizedBugThisWouldMiss" : "A bug where the FX rate is not locked at initiation and fluctuates during processing would not be caught. Also, a bug where top-ups above SGD 10,000 proceed without second-owner approval would be missed.",
+  "suggestedReplacement" : {
+    "id" : "tc-3-enhanced",
+    "description" : "Verify FX rate lock, credit-before-debit, and dual approval on high-value top-ups with timeout rollback",
+    "steps" : [ "Initiate a top-up of SGD 15,000 and record FX rate at initiation", "Verify FX rate is locked and does not change during processing", "Simulate payment provider callback delay exceeding 5 seconds (timeout)", "Verify transaction is rolled back: destination wallet balance unchanged and funding source not debited", "Initiate a top-up of SGD 15,000 again", "Attempt to settle without second-owner approval and verify settlement is blocked", "Obtain second-owner approval and verify settlement completes with destination wallet credited before funding source debited" ],
+    "expectedResult" : "FX rate is locked at initiation; destination wallet credited before funding source debited; top-ups above SGD 10,000 require second-owner approval; on provider timeout, transaction is rolled back with no changes to wallet or funding source"
+  }
+}

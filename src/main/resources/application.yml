@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: hybrid-llm-evaluator
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4.1-mini}
+          temperature: 0
+
+evaluator:
+  artifact-root: ${EVALUATOR_ARTIFACT_ROOT:artifacts/llm-runs}
+  ci:
+    fallback-threshold: 55

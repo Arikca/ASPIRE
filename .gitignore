@@ -1,0 +1,10 @@
+# Local build outputs and downloaded Maven dependency cache
+target/
+work/
+
+# Local credentials and macOS metadata
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea/
